@@ -75,8 +75,8 @@ class OperatorsJoinIndexTest : public BaseTest {
 
     // ToDo(pi) new test is built here
     // build index over all chunks and columns
-    std::vector<ChunkID> chunk_ids(table->chunk_count());
-    for (ChunkID chunk_id{0}; chunk_id < table->chunk_count(); ++chunk_id) {
+    std::vector<ChunkID> chunk_ids(table->chunk_count() - 1);
+    for (ChunkID chunk_id{0}; chunk_id < table->chunk_count() - 1; ++chunk_id) {
       chunk_ids[chunk_id] = chunk_id;
     }
     auto column_count = table->get_chunk(ChunkID{0})->column_count();
@@ -279,10 +279,10 @@ TEST_F(OperatorsJoinIndexTest, MultiJoinOnReferenceLeftIndexLeft) {
 
 TEST_F(OperatorsJoinIndexTest, RightJoinPruneInputIsRefIndexInputIsDataIndexSideIsRight) {
   // scan that returns all rows
-  auto scan_a = create_table_scan(_table_wrapper_a, ColumnID{0}, PredicateCondition::GreaterThanEquals, 0);
+  auto scan_a = create_table_scan(_table_wrapper_h, ColumnID{0}, PredicateCondition::GreaterThanEquals, 0);
   scan_a->execute();
 
-  test_join_output(scan_a, _table_wrapper_b, {{ColumnID{0}, ColumnID{0}}, PredicateCondition::Equals}, JoinMode::Right,
+  test_join_output(scan_a, _table_wrapper_i, {{ColumnID{0}, ColumnID{0}}, PredicateCondition::Equals}, JoinMode::Inner,
                    1, true);
 }
 

@@ -13,7 +13,7 @@ namespace opossum {
 
 class AbstractSegment;
 
-class AbstractOrderedIndex : public AbstractIndex<ChunkOffset> {
+class AbstractOrderedIndex : public AbstractIndex<ChunkOffset, AbstractOrderedIndex::Iterator> {
   friend class GroupKeyIndexTest;
 
  public:

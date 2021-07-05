@@ -7,13 +7,63 @@
 
 namespace opossum {
 
+template <typename V>
+struct FlatMapIterator
+{
+  using iterator_category = std::forward_iterator_tag;
+  using difference_type   = std::ptrdiff_t;
+  using value_type        = V;
+  using pointer           = V*;
+  using reference         = V&;
+
+  using map_key = AllTypeVariant;
+  using map_iterator = typename tsl::robin_map<map_key, std::vector<V>>::iterator;
+
+  FlatMapIterator(map_iterator begin, map_iterator end)
+      :_map_itr(begin), _end(end) {}
+
+  reference operator*() const {
+    return *_map_itr.second[_v_idx];
+  }
+
+  pointer operator->() {
+    return _map_itr.second[_v_idx];
+  }
+
+  FlatMapIterator& operator++() {
+    if(_map_itr == _end) return FlatMapIterator<RowID>(_end, _end); // TODO(pi): maybe use different end return type?
+    if(++_v_idx >= _map_itr.second->size()) {
+      _map_itr++;
+      _v_idx = 0;
+    }
+    return *this;
+  }
+  FlatMapIterator operator++(int) {
+    FlatMapIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+  friend bool operator== (const FlatMapIterator& a, const FlatMapIterator& b) {
+    return a._map_itr == b._map_itr && a._v_idx == b._v_idx;
+  }
+  friend bool operator!= (const FlatMapIterator& a, const FlatMapIterator& b) {
+    return a._map_itr != b._map_itr || a._v_idx != b._v_idx;
+  }
+
+ private:
+  map_iterator _map_itr;
+  map_iterator _end;
+
+  size_t _v_idx = 0; //TODO(pi): what happens if vector is empty?!
+};
+
 class PartialHashIndexTest;
 
-class PartialHashIndex : public AbstractTableIndex {
+class PartialHashIndex : public AbstractTableIndex<PartialHashIndex::Iterator> {
   friend PartialHashIndexTest;
 
  public:
-  using Iterator = std::vector<RowID>::const_iterator;
+  using Iterator = FlatMapIterator<RowID>;
 
   /**
  * Predicts the memory consumption in bytes of creating this index.
@@ -25,9 +75,6 @@ class PartialHashIndex : public AbstractTableIndex {
 
   PartialHashIndex() = delete;
   PartialHashIndex(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>&, const ColumnID);
-
-
-
 
 
  protected:

@@ -42,6 +42,10 @@ std::shared_ptr<const Table> IndexScan::_on_execute() {
 
   auto jobs = std::vector<std::shared_ptr<AbstractTask>>{};
   if (included_chunk_ids.empty()) {
+    //TODO(pi): Check if table has table_indexes
+    // If yes, use these to scan the table via index
+    // Afterwards, process the remaining chunks via old logic
+
     const auto chunk_count = _in_table->chunk_count();
     jobs.reserve(chunk_count);
     for (auto chunk_id = ChunkID{0u}; chunk_id < chunk_count; ++chunk_id) {

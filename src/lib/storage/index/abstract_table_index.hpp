@@ -5,10 +5,11 @@
 
 namespace opossum {
 
-class AbstractTableIndex : public AbstractIndex<RowID> {
+template <typename Iterator>
+class AbstractTableIndex : public AbstractIndex<RowID, Iterator> {
 
  public:
-  using Iterator = std::vector<RowID>::const_iterator;
+  //using Iterator = std::vector<RowID>::const_iterator;
 
   /**
  * Predicts the memory consumption in bytes of creating this index.

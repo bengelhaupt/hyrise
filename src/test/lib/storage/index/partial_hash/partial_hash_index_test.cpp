@@ -41,7 +41,7 @@ class PartialHashIndexTest : public BaseTest {
     chunks_to_index.push_back(std::make_pair(ChunkID{0}, table->get_chunk(ChunkID{0})));
     chunks_to_index.push_back(std::make_pair(ChunkID{1}, table->get_chunk(ChunkID{1})));
 
-    index = std::make_shared<PartialHashIndex>(chunks_to_index , ColumnID{0});
+    index = std::make_shared<PartialHashIndex>(chunks_to_index, ColumnID{0});
 
     index_map = &(index->_map);
   }
@@ -58,12 +58,9 @@ class PartialHashIndexTest : public BaseTest {
    * private scope. Since the variable is set in setup() references are not possible.
    */
   tsl::robin_map<AllTypeVariant, std::vector<RowID>>* index_map = nullptr;
-
 };
 
-TEST_F(PartialHashIndexTest, Type) {
-  EXPECT_EQ(index->type(), IndexType::PartialHash);
-}
+TEST_F(PartialHashIndexTest, Type) { EXPECT_EQ(index->type(), IndexType::PartialHash); }
 
 TEST_F(PartialHashIndexTest, MapInitialization) {
   EXPECT_EQ(index_map->size(), 10);
@@ -118,9 +115,9 @@ TEST_F(PartialHashIndexTest, Values) {
   auto end = index->cend();
 
   EXPECT_EQ(end - begin, 14);
-  for(uint32_t chunk_id = 0; chunk_id < 2;chunk_id++) {
+  for (uint32_t chunk_id = 0; chunk_id < 2; chunk_id++) {
     for (uint32_t chunk_offset = 0; chunk_offset < 8; chunk_offset++) {
-      if((chunk_id == 0 && chunk_offset == 2) || (chunk_id == 1 && chunk_offset == 4)){
+      if ((chunk_id == 0 && chunk_offset == 2) || (chunk_id == 1 && chunk_offset == 4)) {
         continue;
       }
       EXPECT_EQ(*(begin++), (RowID{ChunkID{chunk_id}, ChunkOffset{chunk_offset}}));
@@ -146,6 +143,15 @@ TEST_F(PartialHashIndexTest, EqualsValueNotFound) {
 
   EXPECT_EQ(end, begin);
   EXPECT_EQ(end, index->cend());
+}
+
+TEST_F(PartialHashIndexTest, IndexedChunkIds) {
+  auto indexed_ids = index->get_indexed_chunk_ids();
+
+  EXPECT_EQ(indexed_ids.size(), 2);
+  EXPECT_NE(indexed_ids.find(ChunkID{0}), indexed_ids.end());
+  EXPECT_NE(indexed_ids.find(ChunkID{1}), indexed_ids.end());
+  EXPECT_EQ(indexed_ids.find(ChunkID{2}), indexed_ids.end());
 }
 
 /*TEST_F(PartialHashIndexTest, IndexProbes) {

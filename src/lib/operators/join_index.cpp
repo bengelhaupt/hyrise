@@ -46,6 +46,10 @@ bool JoinIndex::supports(const JoinConfiguration config) {
   }
 }
 
+// Inner Join where l_int = r_int
+// Index Side: Right
+// Doubles rows
+
 JoinIndex::JoinIndex(const std::shared_ptr<const AbstractOperator>& left,
                      const std::shared_ptr<const AbstractOperator>& right, const JoinMode mode,
                      const OperatorJoinPredicate& primary_predicate,
@@ -207,7 +211,7 @@ std::shared_ptr<const Table> JoinIndex::_on_execute() {
     // do only PHI, no Chunk Indices
     const auto& table_indexes = _index_input_table->get_table_indexes(_adjusted_primary_predicate.column_ids.second);
 
-    if (!table_indexes.empty() && _adjusted_primary_predicate.predicate_condition == PredicateCondition::Equals && (_mode == JoinMode::Inner || _mode == JoinMode::Semi) && _secondary_predicates.empty()) {  // ToDo (pi) assert equi join // table-based index join
+    if (!table_indexes.empty() && _adjusted_primary_predicate.predicate_condition == PredicateCondition::Equals && _secondary_predicates.empty()) { //&& (_mode == JoinMode::Inner || _mode == JoinMode::Semi) && _secondary_predicates.empty()) {  // ToDo (pi) assert equi join // table-based index join
 
       const auto& table_index = table_indexes.front();
 
@@ -224,6 +228,7 @@ std::shared_ptr<const Table> JoinIndex::_on_execute() {
         index_joining_duration += timer.lap();
         join_index_performance_data.chunks_scanned_with_index++;
       }
+
 
       const auto chunk_count_index_input_table = _index_input_table->chunk_count();
       auto indexed_chunk_ids = table_index->get_indexed_chunk_ids();
@@ -368,11 +373,11 @@ void JoinIndex::_data_join_two_segments_using_table_index(ProbeIterator probe_it
             index_ranges.emplace_back(TableIndexRange{table_index->cbegin(), table_index->cend()});
             index_ranges.emplace_back(TableIndexRange{table_index->null_cbegin(), table_index->null_cend()});
         }
-    }
-
-    if (!probe_side_position.is_null()) {
+    } else {
+      if (!probe_side_position.is_null()) {
         const auto [index_begin, index_end] = table_index->equals(probe_side_position.value());
         index_ranges.emplace_back(TableIndexRange{index_begin, index_end});
+      }
     }
     for (const auto& [index_begin, index_end] : index_ranges) {
       _append_matches_table_index(index_begin, index_end, probe_side_position.chunk_offset(), probe_chunk_id);
@@ -549,7 +554,6 @@ void JoinIndex::_append_matches_table_index(const AbstractTableIndex::Iterator& 
   if (!is_semi_or_anti_join) {
     // we replicate the probe side value for each index side value
     std::fill_n(std::back_inserter(*_probe_pos_list), num_index_matches, RowID{probe_chunk_id, probe_chunk_offset});
-
     std::copy(range_begin, range_end, std::back_inserter(*_index_pos_list));
   }
 

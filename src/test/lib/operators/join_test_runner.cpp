@@ -181,9 +181,9 @@ class JoinTestRunner : public BaseTestWithParam<JoinTestConfiguration> {
         PredicateCondition::GreaterThan, PredicateCondition::GreaterThanEquals,
         PredicateCondition::LessThan,    PredicateCondition::LessThanEquals,*/
     };
-    const auto all_join_modes = std::vector{JoinMode::Inner/*,         JoinMode::Left, JoinMode::Right,
+    const auto all_join_modes = std::vector{JoinMode::Inner,         JoinMode::Left, JoinMode::Right,
                                             JoinMode::FullOuter,     JoinMode::Semi, JoinMode::AntiNullAsFalse,
-                                            JoinMode::AntiNullAsTrue*/};
+                                            JoinMode::AntiNullAsTrue};
     const auto all_table_sizes = std::vector{10u, 15u, 0u};
     const auto all_chunk_sizes = std::vector{10u, 3u, 1u};
     const auto all_secondary_predicate_sets = std::vector<std::vector<OperatorJoinPredicate>>{
@@ -797,12 +797,12 @@ TEST_P(JoinTestRunner, TestJoin) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(JoinNestedLoop, JoinTestRunner,
+/*INSTANTIATE_TEST_SUITE_P(JoinNestedLoop, JoinTestRunner,
                          testing::ValuesIn(JoinTestRunner::create_configurations<JoinNestedLoop>()));
 INSTANTIATE_TEST_SUITE_P(JoinHash, JoinTestRunner,
                          testing::ValuesIn(JoinTestRunner::create_configurations<JoinHash>()));
 INSTANTIATE_TEST_SUITE_P(JoinSortMerge, JoinTestRunner,
-                         testing::ValuesIn(JoinTestRunner::create_configurations<JoinSortMerge>()));
+                         testing::ValuesIn(JoinTestRunner::create_configurations<JoinSortMerge>()));*/
 INSTANTIATE_TEST_SUITE_P(JoinIndex, JoinTestRunner,
                          testing::ValuesIn(JoinTestRunner::create_configurations<JoinIndex>()));
 

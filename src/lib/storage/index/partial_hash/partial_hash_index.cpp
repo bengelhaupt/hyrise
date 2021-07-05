@@ -2,7 +2,7 @@
 
 #include "storage/segment_iterate.hpp"
 
-namespace opossum {
+namespace opossum {teratir
 
 size_t PartialHashIndex::estimate_memory_consumption(ChunkOffset row_count, ChunkOffset distinct_count,
                                                      uint32_t value_bytes) {
@@ -11,15 +11,17 @@ size_t PartialHashIndex::estimate_memory_consumption(ChunkOffset row_count, Chun
 
 PartialHashIndex::PartialHashIndex(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index,
                                    const ColumnID column_id)
-    : AbstractTableIndex{get_index_type_of<PartialHashIndex>()}, _column_id(column_id) {
+    : AbstractTableIndex<PartialHashIndex::Iterator>{get_index_type_of<PartialHashIndex>()}, _column_id(column_id) {
   if (!chunks_to_index.empty()) {
     resolve_data_type(chunks_to_index.front().second->get_segment(column_id)->data_type(),
                       [&](const auto column_data_type) {
                         using ColumnDataType = typename decltype(column_data_type)::type;
 
-                        // ToDo(pi) check all have same data type by taking first and comapring rest
-                        //ToDo(pi) set null positions
+                        // ToDo(pi) check all have same data type by taking first and comparing rest
+                        // ToDo(pi) set null positions
                         for (const auto& chunk : chunks_to_index) {
+                          if(_indexed_chunk_ids.contains(chunk.first)) continue;
+
                           _indexed_chunk_ids.insert(chunk.first);
                           auto indexed_segment = chunk.second->get_segment(column_id);
                           segment_iterate<ColumnDataType>(*indexed_segment, [&](const auto& position) {
@@ -31,7 +33,7 @@ PartialHashIndex::PartialHashIndex(const std::vector<std::pair<ChunkID, std::sha
                                 _map[position.value()] = std::vector<RowID>();  // ToDo(pi) size
                               }
                               _map[position.value()].push_back(row_id);
-                              _row_ids.push_back(row_id);
+                              _row_ids.push_back(row_id); //TODO(pi) Rethink concept
                             }
                           });
                           _indexed_segments.push_back(indexed_segment);
@@ -50,12 +52,12 @@ std::pair<PartialHashIndex::Iterator, PartialHashIndex::Iterator> PartialHashInd
     auto end_iter = _cend();
     return std::make_pair(end_iter, end_iter);  // ToDo public or protected member
   }
-  return std::make_pair(result->second.begin(), result->second.end());
+  return std::make_pair(FlatMapIterator(result->second.begin(), result->second.end()), result->second.end());
 }
 
-PartialHashIndex::Iterator PartialHashIndex::_cbegin() const { return _row_ids.begin(); }
+PartialHashIndex::Iterator PartialHashIndex::_cbegin() const { return FlatMapIterator<RowID>(_map.begin(), _map.end()); }
 
-PartialHashIndex::Iterator PartialHashIndex::_cend() const { return _row_ids.end(); }
+PartialHashIndex::Iterator PartialHashIndex::_cend() const { return FlatMapIterator<RowID>(_map.end(), _map.end()); }
 
 std::vector<std::shared_ptr<const AbstractSegment>> PartialHashIndex::_get_indexed_segments() const {
   return _indexed_segments;
