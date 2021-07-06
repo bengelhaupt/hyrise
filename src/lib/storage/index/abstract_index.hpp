@@ -33,13 +33,10 @@ class AbstractSegment;
  *                                               https://github.com/hyrise/hyrise/wiki/IndexesAndFilters
  **/
 
-template <typename PositionEntry, typename Iterator>
+template <typename PositionEntry, typename Iterator = typename std::vector<PositionEntry>::const_iterator>
 class AbstractIndex : private Noncopyable {
 
  public:
-  // For now we use an iterator over a vector of chunkoffsets as the GroupKeyIndex works like this
-  //virtual using Iterator = typename std::vector<PositionEntry>::const_iterator;
-
   /**
    * Predicts the memory consumption in bytes of creating an index with the specific index implementation <type>
    * on a Chunk with the following statistics:

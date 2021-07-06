@@ -458,6 +458,8 @@ set(
     storage/index/abstract_ordered_index.hpp
     storage/index/abstract_table_index.cpp
     storage/index/abstract_table_index.hpp
+    storage/index/abstract_table_index_iterator.cpp
+    storage/index/abstract_table_index_iterator.hpp
     storage/index/adaptive_radix_tree/adaptive_radix_tree_index.cpp
     storage/index/adaptive_radix_tree/adaptive_radix_tree_index.hpp
     storage/index/adaptive_radix_tree/adaptive_radix_tree_nodes.cpp
@@ -654,6 +656,7 @@ set(
     LIBRARIES
     compact_vector
     lz4
+    robin-map
     sqlparser
     uninitialized_vector
     zstd

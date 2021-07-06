@@ -2,8 +2,7 @@
 
 namespace opossum {
 
-<typename Iterator>
-AbstractTableIndex::AbstractTableIndex(const IndexType type) : AbstractIndex<RowID, Iterator>(type) {}
+AbstractTableIndex::AbstractTableIndex(const IndexType type) : AbstractIndex<RowID, AbstractTableIndexIterator>(type) {}
 
 std::pair<AbstractTableIndex::Iterator, AbstractTableIndex::Iterator> AbstractTableIndex::equals(const AllTypeVariant& value) const {
   return _equals(value);
