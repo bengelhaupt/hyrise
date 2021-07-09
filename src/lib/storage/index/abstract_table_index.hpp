@@ -2,14 +2,13 @@
 
 #include "storage/table.hpp"
 #include "storage/index/abstract_index.hpp"
-#include "storage/index/abstract_table_index_iterator.hpp"
 
 namespace opossum {
 
-class AbstractTableIndex : public AbstractIndex<RowID, AbstractTableIndexIterator> {
+class AbstractTableIndex : public AbstractIndex<RowID> {
 
  public:
-  using Iterator = AbstractTableIndexIterator;
+  using Iterator = std::vector<RowID>::const_iterator;
 
   /**
  * Predicts the memory consumption in bytes of creating this index.

@@ -33,10 +33,12 @@ class AbstractSegment;
  *                                               https://github.com/hyrise/hyrise/wiki/IndexesAndFilters
  **/
 
-template <typename PositionEntry, typename Iterator = typename std::vector<PositionEntry>::const_iterator>
+template <typename PositionEntry>
 class AbstractIndex : private Noncopyable {
 
  public:
+  using Iterator = typename std::vector<PositionEntry>::const_iterator;
+
   /**
    * Predicts the memory consumption in bytes of creating an index with the specific index implementation <type>
    * on a Chunk with the following statistics:
