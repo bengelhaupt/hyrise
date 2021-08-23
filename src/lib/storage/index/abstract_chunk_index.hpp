@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "all_type_variant.hpp"
-#include "segment_index_type.hpp"
+#include "chunk_index_type.hpp"
 #include "types.hpp"
 #include "utils/assert.hpp"
 
@@ -13,7 +13,7 @@ namespace opossum {
 class AbstractSegment;
 
 /**
- * AbstractIndex is the abstract super class for all index types, e.g. GroupKeyIndex, CompositeGroupKeyIndex,
+ * AbstractChunkIndex is the abstract super class for all index types, e.g. GroupKeyIndex, CompositeGroupKeyIndex,
  * ARTIndex etc.
  * It is assumed that all index types support range queries and that they are composite indexes.
  * I.e. the index is sorted based on the column order. To check whether a key is less than another
@@ -29,11 +29,11 @@ class AbstractSegment;
  * As each index has a different way of iterating over its data structures, it has to implement its iterator as well.
  * We might use the impl-pattern similar to the TableScan, but this will be in a future commit.
  *
- * Find more information about this in our wiki: https://github.com/hyrise/hyrise/wiki/AbstractIndex and
+ * Find more information about this in our wiki: https://github.com/hyrise/hyrise/wiki/AbstractChunkIndex and
  *                                               https://github.com/hyrise/hyrise/wiki/IndexesAndFilters
  **/
 
-class AbstractIndex : private Noncopyable {
+class AbstractChunkIndex : private Noncopyable {
   friend class GroupKeyIndexTest;
 
  public:
@@ -59,10 +59,10 @@ class AbstractIndex : private Noncopyable {
    * leads to very different indexes.
    */
 
-  AbstractIndex() = delete;
-  explicit AbstractIndex(const SegmentIndexType type);
-  AbstractIndex(AbstractIndex&&) = default;
-  virtual ~AbstractIndex() = default;
+  AbstractChunkIndex() = delete;
+  explicit AbstractChunkIndex(const ChunkIndexType type);
+  AbstractChunkIndex(AbstractChunkIndex&&) = default;
+  virtual ~AbstractChunkIndex() = default;
 
   /**
    * Checks whether the given segments are covered by the index. This is the case when the order of the given columns
@@ -140,7 +140,7 @@ class AbstractIndex : private Noncopyable {
    */
   Iterator null_cend() const;
 
-  SegmentIndexType type() const;
+  ChunkIndexType type() const;
 
   /**
    * Returns the memory consumption of this Index in bytes
@@ -161,6 +161,6 @@ class AbstractIndex : private Noncopyable {
   std::vector<ChunkOffset> _null_positions;
 
  private:
-  const SegmentIndexType _type;
+  const ChunkIndexType _type;
 };
 }  // namespace opossum

@@ -53,7 +53,7 @@ class PartialHashIndexTest : public BaseTest {
   tsl::robin_map<pmr_string, std::vector<RowID>>* index_map = nullptr;
 };
 
-TEST_F(PartialHashIndexTest, Type) { EXPECT_EQ(index->type(), SegmentIndexType::PartialHash); }
+TEST_F(PartialHashIndexTest, Type) { EXPECT_EQ(index->type(), TableIndexType::PartialHash); }
 
 TEST_F(PartialHashIndexTest, IndexCoverage) {
   EXPECT_EQ(index->get_indexed_chunk_ids(), (std::set<ChunkID>{ChunkID{0}, ChunkID{1}}));
@@ -68,8 +68,8 @@ TEST_F(PartialHashIndexTest, EmptyInitialization) {
   EXPECT_EQ(empty_index.cbegin(), empty_index.cend());
   EXPECT_EQ(empty_index.null_cbegin(), empty_index.null_cend());
 
-  EXPECT_EQ(empty_index.equals("any").first, empty_index.cend());
-  EXPECT_EQ(empty_index.equals("any").second, empty_index.cend());
+  EXPECT_EQ(empty_index.range_equals("any").first, empty_index.cend());
+  EXPECT_EQ(empty_index.range_equals("any").second, empty_index.cend());
 
   EXPECT_EQ(empty_index.get_indexed_chunk_ids().size(), 0);
 
@@ -163,33 +163,33 @@ TEST_F(PartialHashIndexTest, Add) {
   EXPECT_EQ(index->get_indexed_chunk_ids(), (std::set<ChunkID>{ChunkID{0}, ChunkID{1}, ChunkID{2}}));
   EXPECT_EQ(std::distance(index->cbegin(), index->cend()), 21);
   EXPECT_EQ(std::distance(index->null_cbegin(), index->null_cend()), 3);
-  EXPECT_EQ(*index->equals("new1").first, (RowID{ChunkID{2}, ChunkOffset{0}}));
+  EXPECT_EQ(*index->range_equals("new1").first, (RowID{ChunkID{2}, ChunkOffset{0}}));
 
   EXPECT_EQ(index->add(chunks_to_add), 0);
 }
 
-TEST_F(PartialHashIndexTest, AddToEmpty) {
+TEST_F(PartialHashIndexTest, InsertIntoEmpty) {
   auto empty_index = PartialHashIndex(std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>(), ColumnID{0});
 
   auto chunks_to_add =
       std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>{std::make_pair(ChunkID{0}, table->get_chunk(ChunkID{0}))};
-  EXPECT_EQ(empty_index.add(chunks_to_add), 1);
+  EXPECT_EQ(empty_index.insert_entries(chunks_to_add), 1);
 
   EXPECT_EQ(empty_index.get_indexed_chunk_ids(), (std::set<ChunkID>{ChunkID{0}}));
   EXPECT_EQ(std::distance(empty_index.cbegin(), empty_index.cend()), 7);
   EXPECT_EQ(std::distance(empty_index.null_cbegin(), empty_index.null_cend()), 1);
-  EXPECT_EQ(*empty_index.equals("hotel").first, (RowID{ChunkID{0}, ChunkOffset{0}}));
+  EXPECT_EQ(*empty_index.range_equals("hotel").first, (RowID{ChunkID{0}, ChunkOffset{0}}));
 }
 
 TEST_F(PartialHashIndexTest, Remove) {
-  EXPECT_EQ(index->remove(std::vector<ChunkID>{ChunkID{0}}), 1);
+  EXPECT_EQ(index->remove_entries(std::vector<ChunkID>{ChunkID{0}}), 1);
 
   EXPECT_EQ(index->get_indexed_chunk_ids(), (std::set<ChunkID>{ChunkID{1}}));
   EXPECT_EQ(std::distance(index->cbegin(), index->cend()), 7);
   EXPECT_EQ(std::distance(index->null_cbegin(), index->null_cend()), 1);
-  EXPECT_EQ(index->equals("hotel").first, index->cend());
+  EXPECT_EQ(index->range_equals("hotel").first, index->cend());
 
-  EXPECT_EQ(index->remove(std::vector<ChunkID>{ChunkID{0}}), 0);
+  EXPECT_EQ(index->remove_entries(std::vector<ChunkID>{ChunkID{0}}), 0);
 }
 
 TEST_F(PartialHashIndexTest, RemoveFromEmpty) {
@@ -225,7 +225,7 @@ TEST_F(PartialHashIndexTest, Values) {
 
 TEST_F(PartialHashIndexTest, EqualsValue) {
   auto value = "delta";
-  auto [begin, end] = index->equals(value);
+  auto [begin, end] = index->range_equals(value);
 
   std::multiset<RowID> expected = {RowID{ChunkID{0}, ChunkOffset{1}}, RowID{ChunkID{0}, ChunkOffset{3}},
                                    RowID{ChunkID{1}, ChunkOffset{1}}};
@@ -244,7 +244,7 @@ TEST_F(PartialHashIndexTest, EqualsValue) {
 
 TEST_F(PartialHashIndexTest, EqualsValueNotFound) {
   auto value = "invalid";
-  auto [begin, end] = index->equals(value);
+  auto [begin, end] = index->range_equals(value);
 
   EXPECT_EQ(end, begin);
   EXPECT_EQ(end, index->cend());
@@ -252,7 +252,7 @@ TEST_F(PartialHashIndexTest, EqualsValueNotFound) {
 
 TEST_F(PartialHashIndexTest, NotEqualsValue) {
   auto value = "delta";
-  auto pair = index->not_equals(value);
+  auto pair = index->range_not_equals(value);
   auto [begin1, end1] = pair.first;
   auto [begin2, end2] = pair.second;
 
@@ -281,7 +281,7 @@ TEST_F(PartialHashIndexTest, NotEqualsValue) {
 
 TEST_F(PartialHashIndexTest, NotEqualsValueNotFound) {
   auto value = "invalid";
-  auto pair = index->not_equals(value);
+  auto pair = index->range_not_equals(value);
   auto [begin1, end1] = pair.first;
   auto [begin2, end2] = pair.second;
 
@@ -339,7 +339,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNoNulls) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 SegmentIndexType
+  // +   1 ChunkIndexType
   // = 608
   EXPECT_EQ(index->memory_consumption(), 608u);
 }
@@ -369,7 +369,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNulls) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 SegmentIndexType
+  // +   1 ChunkIndexType
   // = 280
   EXPECT_EQ(index->memory_consumption(), 280u);
 }
@@ -400,7 +400,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionMixed) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 SegmentIndexType
+  // +   1 ChunkIndexType
   // = 680
   EXPECT_EQ(index->memory_consumption(), 680u);
 }
@@ -429,7 +429,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionEmpty) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 SegmentIndexType
+  // +   1 ChunkIndexType
   // = 232
   EXPECT_EQ(index->memory_consumption(), 232u);
 }

@@ -7,21 +7,23 @@ template <typename DataType>
 PartialHashIndexImpl<DataType>::PartialHashIndexImpl(
     const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index, const ColumnID column_id)
     : BasePartialHashIndexImpl() {
-  add(chunks_to_index, column_id);
+  insert_entries(chunks_to_index, column_id);
 }
 
 template <typename DataType>
-size_t PartialHashIndexImpl<DataType>::add(
+size_t PartialHashIndexImpl<DataType>::insert_entries(
     const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index, const ColumnID column_id) {
   size_t size_before = _indexed_chunk_ids.size();
   for (const auto& chunk : chunks_to_index) {
-    // do not allow multiple indexing of one chunk
+    // We do not allow multiple indexing of one chunk.
     if (_indexed_chunk_ids.contains(chunk.first)) continue;
 
     _indexed_chunk_ids.insert(chunk.first);
+    // Iterate over the segment to index and populate the index.
     auto indexed_segment = chunk.second->get_segment(column_id);
     segment_iterate<DataType>(*indexed_segment, [&](const auto& position) {
       auto row_id = RowID{chunk.first, position.chunk_offset()};
+      // If value is NULL, add to NULL vector, otherwise add into value map.
       if (position.is_null()) {
         if (!_null_values.contains(true)) {
           _null_values[true] = std::vector<RowID>();
@@ -40,19 +42,22 @@ size_t PartialHashIndexImpl<DataType>::add(
 }
 
 template <typename DataType>
-size_t PartialHashIndexImpl<DataType>::remove(const std::vector<ChunkID>& chunks_to_remove) {
+size_t PartialHashIndexImpl<DataType>::remove_entries(const std::vector<ChunkID>& chunks_to_unindex) {
   size_t size_before = _indexed_chunk_ids.size();
-  for (const auto& chunk_id : chunks_to_remove) {
+  for (const auto& chunk_id : chunks_to_unindex) {
     if (!_indexed_chunk_ids.contains(chunk_id)) continue;
 
     _indexed_chunk_ids.erase(chunk_id);
+    // Iterate over all values stored in the index.
     auto map_iter = _map.begin();
     while (map_iter != _map.end()) {
-      auto& values = _map.at(map_iter->first);
-      values.erase(std::remove_if(values.begin(), values.end(),
-                                  [chunk_id](RowID& row_id) { return row_id.chunk_id == chunk_id; }),
-                   values.end());
-      if (values.empty()) {
+      // Remove every RowID entry of the value that references the chunk.
+      // TODO(pi): delete references to all chunks at one?
+      auto& entries_for_value = _map.at(map_iter->first);
+      entries_for_value.erase(std::remove_if(entries_for_value.begin(), entries_for_value.end(),
+                                             [chunk_id](RowID& row_id) { return row_id.chunk_id == chunk_id; }),
+                              entries_for_value.end());
+      if (entries_for_value.empty()) {
         map_iter = _map.erase(map_iter);
       } else {
         ++map_iter;
@@ -68,7 +73,7 @@ size_t PartialHashIndexImpl<DataType>::remove(const std::vector<ChunkID>& chunks
 }
 
 template <typename DataType>
-typename PartialHashIndexImpl<DataType>::IteratorPair PartialHashIndexImpl<DataType>::equals(
+typename PartialHashIndexImpl<DataType>::IteratorPair PartialHashIndexImpl<DataType>::range_equals(
     const AllTypeVariant& value) const {
   auto begin = _map.find(boost::get<DataType>(value));
   if (begin == _map.end()) {
@@ -82,7 +87,7 @@ typename PartialHashIndexImpl<DataType>::IteratorPair PartialHashIndexImpl<DataT
 
 template <typename DataType>
 std::pair<typename PartialHashIndexImpl<DataType>::IteratorPair, typename PartialHashIndexImpl<DataType>::IteratorPair>
-PartialHashIndexImpl<DataType>::not_equals(const AllTypeVariant& value) const {
+PartialHashIndexImpl<DataType>::range_not_equals(const AllTypeVariant& value) const {
   auto eq_begin = _map.find(boost::get<DataType>(value));
   auto eq_end = eq_begin;
   if (eq_begin != _map.cend()) {

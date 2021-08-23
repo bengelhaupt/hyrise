@@ -2,6 +2,7 @@
 #include <set>
 
 #include "base_test.hpp"
+#include "lib/storage/index/index_scope.hpp"
 #include "nlohmann/json.hpp"
 #include "operators/join_hash.hpp"
 #include "operators/join_index.hpp"
@@ -40,8 +41,6 @@ enum class InputTableType {
   // Input Tables are reference Tables with each Segment using a different PosList
   IndividualPosLists
 };
-
-enum class IndexScope { Table, Chunk };
 
 std::unordered_map<InputTableType, std::string> input_table_type_to_string{
     {InputTableType::Data, "Data"},
@@ -600,7 +599,7 @@ class JoinTestRunner : public BaseTestWithParam<JoinTestConfiguration> {
 
       /**
        * To sufficiently test IndexJoins, indexes have to be created. Therefore, if index_side is set in the configuration,
-       * indexes for the data table are created. The index scope is either chunk based (AbstractIndex) or table based
+       * indexes for the data table are created. The index scope is either chunk based (AbstractChunkIndex) or table based
        * (AbstractTableIndex).
        */
       if (index_scope == IndexScope::Chunk) {
