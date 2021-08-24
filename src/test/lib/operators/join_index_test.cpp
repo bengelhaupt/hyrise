@@ -1,9 +1,10 @@
-#include <magic_enum.hpp>
 #include <map>
 #include <memory>
 #include <numeric>
 #include <utility>
 #include <vector>
+
+#include <magic_enum.hpp>
 
 #include "base_test.hpp"
 

@@ -194,7 +194,6 @@ std::shared_ptr<const Table> JoinIndex::_on_execute() {
       }
     }
   } else {  // DATA JOIN since only inner joins are supported for a reference table on the index side
-
     // Here we prefer to use table indexes if the join supports them. If no table index exists or other predicates than
     // Equals or NotEquals are requested, chunk indexes are used. If no chunk index exists, NestedLoopJoin is used as a
     // fallback solution.
