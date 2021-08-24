@@ -1,3 +1,4 @@
+#include <magic_enum.hpp>
 #include <map>
 #include <memory>
 #include <numeric>
@@ -75,24 +76,24 @@ class OperatorsJoinIndexTest : public BaseTestWithParam<IndexScope> {
     ChunkEncoder::encode_all_chunks(table, SegmentEncodingSpec{EncodingType::Dictionary});
 
     if (index_scope == IndexScope::Chunk) {
-      // build chunk-based index for every chunk and column
-      for (ChunkID chunk_id{0}; chunk_id < table->chunk_count(); ++chunk_id) {
+      // Build a chunk-based index for every chunk and column.
+      for (auto chunk_id = ChunkID{0}; chunk_id < table->chunk_count(); ++chunk_id) {
         const auto chunk = table->get_chunk(chunk_id);
 
-        std::vector<ColumnID> columns{1};
-        for (ColumnID column_id{0}; column_id < chunk->column_count(); ++column_id) {
+        auto columns = std::vector<ColumnID>(1);
+        for (auto column_id = ColumnID{0}; column_id < chunk->column_count(); ++column_id) {
           columns[0] = column_id;
           chunk->create_index<GroupKeyIndex>(columns);
         }
       }
     } else if (index_scope == IndexScope::Table) {
-      // build table-based index over all chunks and columns
-      std::vector<ChunkID> chunk_ids(table->chunk_count());
-      for (ChunkID chunk_id{0}; chunk_id < table->chunk_count(); ++chunk_id) {
+      // Build a table-based index over all chunks and columns.
+      auto chunk_ids = std::vector<ChunkID>(table->chunk_count());
+      for (auto chunk_id = ChunkID{0}; chunk_id < table->chunk_count(); ++chunk_id) {
         chunk_ids[chunk_id] = chunk_id;
       }
       auto column_count = table->get_chunk(ChunkID{0})->column_count();
-      for (ColumnID column_id{0}; column_id < column_count; ++column_id) {
+      for (auto column_id = ColumnID{0}; column_id < column_count; ++column_id) {
         table->create_table_index<PartialHashIndex>(column_id, chunk_ids);
       }
     }
@@ -294,19 +295,18 @@ TEST_P(OperatorsJoinIndexTest, RightJoinPruneInputIsRefIndexInputIsDataIndexSide
                    JoinMode::Right, 1, true);
 }
 
-const std::unordered_map<IndexScope, std::string> index_scope_string{{IndexScope::Chunk, "Chunk"},
-                                                                     {IndexScope::Table, "Table"}};
-
 auto join_index_test_formatter = [](const ::testing::TestParamInfo<IndexScope> info) {
   auto stream = std::stringstream{};
-  stream << index_scope_string.at(info.param);
+  stream << magic_enum::enum_name(info.param);
 
+  // Remove special characters from stringstream.
   auto string = stream.str();
   string.erase(std::remove_if(string.begin(), string.end(), [](char c) { return !std::isalnum(c); }), string.end());
 
   return string;
 };
 
+// Instantiate a test suite that runs the OperatorsJoinIndexTests definied in this file for both index scopes.
 INSTANTIATE_TEST_SUITE_P(JoinIndex, OperatorsJoinIndexTest, ::testing::Values(IndexScope::Chunk, IndexScope::Table),
                          join_index_test_formatter);
 
