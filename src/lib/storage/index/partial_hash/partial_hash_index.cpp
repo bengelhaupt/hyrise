@@ -23,7 +23,8 @@ PartialHashIndex::PartialHashIndex(const std::vector<std::pair<ChunkID, std::sha
   }
 }
 
-size_t PartialHashIndex::insert_entries(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index) {
+size_t PartialHashIndex::insert_entries(
+    const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index) {
   if (!_is_initialized) {
     resolve_data_type(chunks_to_index.front().second->get_segment(_column_id)->data_type(),
                       [&](const auto column_data_type) {

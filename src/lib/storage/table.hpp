@@ -207,11 +207,8 @@ class Table : private Noncopyable {
     auto index = std::make_shared<Index>(chunks_to_index, column_id);
     _table_indexes.emplace_back(index);
 
-    // Currently, ChunkIndexStatistics only hold information about the indexed column but not the indexed chunks
-    // for both, table-based and chunk-based indexes.
-    // TODO(pi): create tableindex statistics
-    // ChunkIndexStatistics index_statistics = {{column_id}, name, index_type};
-    // _index_statistics.emplace_back(index_statistics);
+    TableIndexStatistics table_indexes_statistics = {{column_id}, chunks_to_index, name, table_index_type};
+    _table_indexes_statistics.emplace_back(table_indexes_statistics);
   }
 
   template <typename Index>

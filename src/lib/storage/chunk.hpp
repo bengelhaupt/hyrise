@@ -91,10 +91,10 @@ class Chunk : private Noncopyable {
       const std::vector<std::shared_ptr<const AbstractSegment>>& segments) const;
   std::vector<std::shared_ptr<AbstractChunkIndex>> get_indexes(const std::vector<ColumnID>& column_ids) const;
 
+  std::shared_ptr<AbstractChunkIndex> get_index(
+      const ChunkIndexType index_type, const std::vector<std::shared_ptr<const AbstractSegment>>& segments) const;
   std::shared_ptr<AbstractChunkIndex> get_index(const ChunkIndexType index_type,
-                                           const std::vector<std::shared_ptr<const AbstractSegment>>& segments) const;
-  std::shared_ptr<AbstractChunkIndex> get_index(const ChunkIndexType index_type,
-                                           const std::vector<ColumnID>& column_ids) const;
+                                                const std::vector<ColumnID>& column_ids) const;
 
   template <typename Index>
   std::shared_ptr<AbstractChunkIndex> create_index(

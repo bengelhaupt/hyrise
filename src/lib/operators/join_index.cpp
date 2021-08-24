@@ -193,7 +193,7 @@ std::shared_ptr<const Table> JoinIndex::_on_execute() {
         nested_loop_joining_duration += timer.lap();
       }
     }
-  } else { // DATA JOIN since only inner joins are supported for a reference table on the index side
+  } else {  // DATA JOIN since only inner joins are supported for a reference table on the index side
 
     // Here we prefer to use table indexes if the join supports them. If no table index exists or other predicates than
     // Equals or NotEquals are requested, chunk indexes are used. If no chunk index exists, NestedLoopJoin is used as a
@@ -327,9 +327,8 @@ void JoinIndex::_scan_probe_side_input(const Functor& functor) {
     Assert(chunk, "Physically deleted chunk should not reach this point, see get_chunk / #1686.");
 
     const auto& probe_segment = chunk->get_segment(_adjusted_primary_predicate.column_ids.first);
-    segment_with_iterators(*probe_segment, [&](auto probe_iter, const auto probe_end) {
-      functor(probe_iter, probe_end, probe_chunk_id);
-    });
+    segment_with_iterators(
+        *probe_segment, [&](auto probe_iter, const auto probe_end) { functor(probe_iter, probe_end, probe_chunk_id); });
   }
 }
 
@@ -529,9 +528,9 @@ std::vector<IndexRange> JoinIndex::_index_ranges_for_value(const SegmentPosition
   return index_ranges;
 }
 
-void JoinIndex::_append_matches(const AbstractChunkIndex::Iterator& range_begin, const AbstractChunkIndex::Iterator& range_end,
-                                const ChunkOffset probe_chunk_offset, const ChunkID probe_chunk_id,
-                                const ChunkID index_chunk_id) {
+void JoinIndex::_append_matches(const AbstractChunkIndex::Iterator& range_begin,
+                                const AbstractChunkIndex::Iterator& range_end, const ChunkOffset probe_chunk_offset,
+                                const ChunkID probe_chunk_id, const ChunkID index_chunk_id) {
   const auto num_index_matches = std::distance(range_begin, range_end);
 
   if (num_index_matches == 0) {

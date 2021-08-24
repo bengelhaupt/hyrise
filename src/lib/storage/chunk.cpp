@@ -127,7 +127,7 @@ std::shared_ptr<AbstractChunkIndex> Chunk::get_index(
 }
 
 std::shared_ptr<AbstractChunkIndex> Chunk::get_index(const ChunkIndexType index_type,
-                                                const std::vector<ColumnID>& column_ids) const {
+                                                     const std::vector<ColumnID>& column_ids) const {
   auto segments = _get_segments_for_ids(column_ids);
   return get_index(index_type, segments);
 }
