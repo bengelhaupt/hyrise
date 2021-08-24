@@ -327,6 +327,8 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNoNulls) {
 
   index = std::make_shared<PartialHashIndex>(chunks_to_index, ColumnID{0});
 
+// Index memory consumption depends on host system.
+#ifdef __GLIBCXX__
   //    80 map size (index non-NULL positions)
   // +  80 map size NULL values (index NULL positions)
   // +  72 number of different non-NULL values (9) * hash size (8)
@@ -342,6 +344,9 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNoNulls) {
   // +   1 ChunkIndexType
   // = 608
   EXPECT_EQ(index->memory_consumption(), 608u);
+#else
+  EXPECT_EQ(index->memory_consumption(), 584u);
+#endif
 }
 
 // A2, B1, C2
@@ -357,6 +362,8 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNulls) {
 
   index = std::make_shared<PartialHashIndex>(chunks_to_index, ColumnID{0});
 
+// Index memory consumption depends on host system.
+#ifdef __GLIBCXX__
   //    80 map size (index non-NULL positions)
   // +  80 map size NULL values (index NULL positions)
   // +   0 number of different non-NULL values (0) * hash size (8)
@@ -372,6 +379,9 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNulls) {
   // +   1 ChunkIndexType
   // = 280
   EXPECT_EQ(index->memory_consumption(), 280u);
+#else
+  EXPECT_EQ(index->memory_consumption(), 256u);
+#endif
 }
 
 // A2, B1, C1
@@ -388,6 +398,8 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionMixed) {
 
   index = std::make_shared<PartialHashIndex>(chunks_to_index, ColumnID{0});
 
+// Index memory consumption depends on host system.
+#ifdef __GLIBCXX__
   //    80 map size (index non-NULL positions)
   // +  80 map size NULL values (index NULL positions)
   // +  72 number of different non-NULL values (9) * hash size (8)
@@ -403,6 +415,9 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionMixed) {
   // +   1 ChunkIndexType
   // = 680
   EXPECT_EQ(index->memory_consumption(), 680u);
+#else
+  EXPECT_EQ(index->memory_consumption(), 656u);
+#endif
 }
 
 // A1, B2, C2
@@ -417,6 +432,8 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionEmpty) {
 
   index = std::make_shared<PartialHashIndex>(chunks_to_index, ColumnID{0});
 
+// Index memory consumption depends on host system.
+#ifdef __GLIBCXX__
   //    80 map size (index non-NULL positions)
   // +  80 map size NULL values (index NULL positions)
   // +   0 number of different non-NULL values (0) * hash size (8)
@@ -432,6 +449,9 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionEmpty) {
   // +   1 ChunkIndexType
   // = 232
   EXPECT_EQ(index->memory_consumption(), 232u);
+#else
+  EXPECT_EQ(index->memory_consumption(), 208u);
+#endif
 }
 
 }  // namespace opossum
