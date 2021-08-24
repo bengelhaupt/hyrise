@@ -3,6 +3,45 @@
 
 namespace opossum {
 
+size_t BasePartialHashIndexImpl::insert_entries(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>&,
+                                                const ColumnID) {
+  return 0;
+}
+
+size_t BasePartialHashIndexImpl::remove_entries(const std::vector<ChunkID>&) { return 0; }
+
+BasePartialHashIndexImpl::Iterator BasePartialHashIndexImpl::cbegin() const {
+  return Iterator(std::make_shared<BaseTableIndexIterator>());
+}
+
+BasePartialHashIndexImpl::Iterator BasePartialHashIndexImpl::cend() const {
+  return Iterator(std::make_shared<BaseTableIndexIterator>());
+}
+
+BasePartialHashIndexImpl::Iterator BasePartialHashIndexImpl::null_cbegin() const {
+  return Iterator(std::make_shared<BaseTableIndexIterator>());
+}
+
+BasePartialHashIndexImpl::Iterator BasePartialHashIndexImpl::null_cend() const {
+  return Iterator(std::make_shared<BaseTableIndexIterator>());
+}
+
+size_t BasePartialHashIndexImpl::memory_consumption() const { return 0; }
+
+BasePartialHashIndexImpl::IteratorPair BasePartialHashIndexImpl::range_equals(const AllTypeVariant& value) const {
+  return std::make_pair(Iterator(std::make_shared<BaseTableIndexIterator>()),
+                        Iterator(std::make_shared<BaseTableIndexIterator>()));
+}
+
+std::pair<BasePartialHashIndexImpl::IteratorPair, BasePartialHashIndexImpl::IteratorPair>
+BasePartialHashIndexImpl::range_not_equals(const AllTypeVariant& value) const {
+  return std::make_pair(range_equals(value), range_equals(value));
+}
+
+bool BasePartialHashIndexImpl::is_index_for(const ColumnID column_id) const { return false; }
+
+std::set<ChunkID> BasePartialHashIndexImpl::get_indexed_chunk_ids() const { return std::set<ChunkID>(); }
+
 template <typename DataType>
 PartialHashIndexImpl<DataType>::PartialHashIndexImpl(
     const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>& chunks_to_index, const ColumnID column_id)
@@ -56,8 +95,7 @@ size_t PartialHashIndexImpl<DataType>::remove_entries(const std::vector<ChunkID>
   // Iterate over all values stored in the index.
   auto map_iter = _map.begin();
   while (map_iter != _map.end()) {
-    // Remove every RowID entry of the value that references the chunk.
-    // TODO(pi): delete references to all chunks at one?
+    // Remove every RowID entry of the value that references one of the chunks.
     auto& entries_for_value = _map.at(map_iter->first);
     entries_for_value.erase(std::remove_if(entries_for_value.begin(), entries_for_value.end(),
                                            [chunks_to_unindex_filtered](RowID& row_id) {

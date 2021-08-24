@@ -26,28 +26,21 @@ class BasePartialHashIndexImpl : public Noncopyable {
 
   virtual ~BasePartialHashIndexImpl() = default;
 
-  virtual size_t insert_entries(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>&, const ColumnID) {
-    return 0;
-  }
-  virtual size_t remove_entries(const std::vector<ChunkID>&) { return 0; }
+  virtual size_t insert_entries(const std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>&, const ColumnID);
+  virtual size_t remove_entries(const std::vector<ChunkID>&);
 
-  virtual Iterator cbegin() const { return Iterator(std::make_shared<BaseTableIndexIterator>()); }
-  virtual Iterator cend() const { return Iterator(std::make_shared<BaseTableIndexIterator>()); }
-  virtual Iterator null_cbegin() const { return Iterator(std::make_shared<BaseTableIndexIterator>()); }
-  virtual Iterator null_cend() const { return Iterator(std::make_shared<BaseTableIndexIterator>()); }
-  virtual size_t memory_consumption() const { return 0; }
+  virtual Iterator cbegin() const;
+  virtual Iterator cend() const;
+  virtual Iterator null_cbegin() const;
+  virtual Iterator null_cend() const;
+  virtual size_t memory_consumption() const;
 
-  virtual IteratorPair range_equals(const AllTypeVariant& value) const {
-    return std::make_pair(Iterator(std::make_shared<BaseTableIndexIterator>()),
-                          Iterator(std::make_shared<BaseTableIndexIterator>()));
-  }
+  virtual IteratorPair range_equals(const AllTypeVariant& value) const;
 
-  virtual std::pair<IteratorPair, IteratorPair> range_not_equals(const AllTypeVariant& value) const {
-    return std::make_pair(range_equals(value), range_equals(value));
-  }
+  virtual std::pair<IteratorPair, IteratorPair> range_not_equals(const AllTypeVariant& value) const;
 
-  virtual bool is_index_for(const ColumnID column_id) const { return false; }
-  virtual std::set<ChunkID> get_indexed_chunk_ids() const { return std::set<ChunkID>(); }
+  virtual bool is_index_for(const ColumnID column_id) const;
+  virtual std::set<ChunkID> get_indexed_chunk_ids() const;
 };
 
 /* Implementation of a partial hash index, that can index any chunk in a column. You can add and remove chunks to
