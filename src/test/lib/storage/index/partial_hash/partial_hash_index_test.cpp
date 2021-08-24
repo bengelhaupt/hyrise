@@ -341,7 +341,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNoNulls) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 ChunkIndexType
+  // +   1 TableIndexType
   // = 608
   EXPECT_EQ(index->memory_consumption(), 608u);
 #else
@@ -376,7 +376,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionNulls) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 ChunkIndexType
+  // +   1 TableIndexType
   // = 280
   EXPECT_EQ(index->memory_consumption(), 280u);
 #else
@@ -412,7 +412,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionMixed) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 ChunkIndexType
+  // +   1 TableIndexType
   // = 680
   EXPECT_EQ(index->memory_consumption(), 680u);
 #else
@@ -446,7 +446,7 @@ TEST_F(PartialHashIndexTest, MemoryConsumptionEmpty) {
   // +   4 number of indexed chunks (1) * sizeof(ChunkID) (4)
   // +   1 _is_initialized
   // +  16 impl
-  // +   1 ChunkIndexType
+  // +   1 TableIndexType
   // = 232
   EXPECT_EQ(index->memory_consumption(), 232u);
 #else
