@@ -88,14 +88,8 @@ typename PartialHashIndexImpl<DataType>::IteratorPair PartialHashIndexImpl<DataT
 template <typename DataType>
 std::pair<typename PartialHashIndexImpl<DataType>::IteratorPair, typename PartialHashIndexImpl<DataType>::IteratorPair>
 PartialHashIndexImpl<DataType>::range_not_equals(const AllTypeVariant& value) const {
-  auto eq_begin = _map.find(boost::get<DataType>(value));
-  auto eq_end = eq_begin;
-  if (eq_begin != _map.cend()) {
-    ++eq_end;
-  }
-  // (cbegin -> eq_begin) + (eq_end -> cend)
-  return std::make_pair(std::make_pair(cbegin(), Iterator(std::make_shared<TableIndexIterator<DataType>>(eq_begin))),
-                        std::make_pair(Iterator(std::make_shared<TableIndexIterator<DataType>>(eq_end)), cend()));
+  auto range_equals = range_equals(value);
+  return std::make_pair(std::make_pair(cbegin(), range_equals.first), std::make_pair(range_equals.second, cend()));
 }
 
 template <typename DataType>
