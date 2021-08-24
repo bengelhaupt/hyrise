@@ -37,7 +37,7 @@ class StoredTableNode : public EnableMakeForLQPNode<StoredTableNode>, public Abs
   const std::vector<ColumnID>& pruned_column_ids() const;
   /** @} */
 
-  std::vector<ChunkIndexStatistics> indexes_statistics() const;
+  std::vector<ChunkIndexStatistics> chunk_indexes_statistics() const;
 
   std::string description(const DescriptionMode mode = DescriptionMode::Short) const override;
   std::vector<std::shared_ptr<AbstractExpression>> output_expressions() const override;

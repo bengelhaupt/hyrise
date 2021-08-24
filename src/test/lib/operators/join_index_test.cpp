@@ -70,7 +70,7 @@ class OperatorsJoinIndexTest : public BaseTestWithParam<IndexScope> {
 
  protected:
   static std::shared_ptr<TableWrapper> load_table_with_index(const std::string& filename, const size_t chunk_size,
-                                                             const Scope index_scope) {
+                                                             const IndexScope index_scope) {
     auto table = load_table(filename, chunk_size);
 
     ChunkEncoder::encode_all_chunks(table, SegmentEncodingSpec{EncodingType::Dictionary});

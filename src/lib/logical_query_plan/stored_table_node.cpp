@@ -123,7 +123,7 @@ std::shared_ptr<LQPUniqueConstraints> StoredTableNode::unique_constraints() cons
   return unique_constraints;
 }
 
-std::vector<ChunkIndexStatistics> StoredTableNode::indexes_statistics() const {
+std::vector<ChunkIndexStatistics> StoredTableNode::chunk_indexes_statistics() const {
   DebugAssert(!left_input() && !right_input(), "StoredTableNode must be a leaf");
 
   const auto table = Hyrise::get().storage_manager.get_table(table_name);

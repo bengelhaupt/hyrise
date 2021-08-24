@@ -17,7 +17,7 @@ class PartialHashIndex;
 namespace detail {
 
 constexpr auto table_index_map =
-    hana::make_map(hana::make_pair(hana::type_c<PartialHashIndex>, ChunkIndexType::PartialHash));
+    hana::make_map(hana::make_pair(hana::type_c<PartialHashIndex>, TableIndexType::PartialHash));
 
 }  // namespace detail
 

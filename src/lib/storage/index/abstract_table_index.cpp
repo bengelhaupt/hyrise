@@ -5,12 +5,12 @@ namespace opossum {
 AbstractTableIndex::AbstractTableIndex(const TableIndexType type) : _type(type) {}
 
 AbstractTableIndex::IteratorPair AbstractTableIndex::range_equals(const AllTypeVariant& value) const {
-  return _equals(value);
+  return _range_equals(value);
 }
 
 std::pair<AbstractTableIndex::IteratorPair, AbstractTableIndex::IteratorPair> AbstractTableIndex::range_not_equals(
     const AllTypeVariant& value) const {
-  return _not_equals(value);
+  return _range_not_equals(value);
 }
 
 AbstractTableIndex::Iterator AbstractTableIndex::cbegin() const { return _cbegin(); }

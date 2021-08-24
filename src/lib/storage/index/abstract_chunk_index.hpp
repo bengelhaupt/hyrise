@@ -50,7 +50,7 @@ class AbstractChunkIndex : private Noncopyable {
    *
    * If no prediction is possible (or it is not implemented yet), this shall fail.
    */
-  static size_t estimate_memory_consumption(SegmentIndexType type, ChunkOffset row_count, ChunkOffset distinct_count,
+  static size_t estimate_memory_consumption(ChunkIndexType type, ChunkOffset row_count, ChunkOffset distinct_count,
                                             uint32_t value_bytes);
 
   /**

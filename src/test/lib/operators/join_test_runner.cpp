@@ -702,7 +702,7 @@ TEST_P(JoinTestRunner, TestJoin) {
     std::cout << "===================== Right Input Table ====================" << std::endl;
     Print::print(right_input_table, PrintFlags::IgnoreChunkBoundaries);
     std::cout << "Chunk size: " << configuration.right_input.chunk_size << std::endl;
-    std::cout << "Table size: " << magic_enum::enum_name.at(configuration.right_input.table_type) << std::endl;
+    std::cout << "Table size: " << magic_enum::enum_name(configuration.right_input.table_type) << std::endl;
     std::cout << "Index scope: " << magic_enum::enum_name(configuration.right_input.index_scope) << std::endl;
     std::cout << "Indexed chunk range: [" << configuration.right_input.indexed_chunk_range.first << ", "
               << configuration.right_input.indexed_chunk_range.second << ")" << std::endl;

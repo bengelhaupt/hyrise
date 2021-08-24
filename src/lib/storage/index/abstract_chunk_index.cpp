@@ -10,7 +10,7 @@
 
 namespace opossum {
 
-size_t AbstractChunkIndex::estimate_memory_consumption(SegmentIndexType type, ChunkOffset row_count,
+size_t AbstractChunkIndex::estimate_memory_consumption(ChunkIndexType type, ChunkOffset row_count,
                                                        ChunkOffset distinct_count, uint32_t value_bytes) {
   switch (type) {
     case ChunkIndexType::GroupKey:

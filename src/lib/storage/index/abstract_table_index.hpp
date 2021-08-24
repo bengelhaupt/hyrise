@@ -115,7 +115,7 @@ class AbstractTableIndex : private Noncopyable {
   using IteratorPair = std::pair<Iterator, Iterator>;
 
   AbstractTableIndex() = delete;
-  explicit AbstractTableIndex(const ChunkIndexType type);
+  explicit AbstractTableIndex(const TableIndexType type);
   AbstractTableIndex(AbstractTableIndex&&) = default;
   virtual ~AbstractTableIndex() = default;
 
@@ -195,8 +195,8 @@ class AbstractTableIndex : private Noncopyable {
   virtual Iterator _cend() const = 0;
   virtual Iterator _null_cbegin() const = 0;
   virtual Iterator _null_cend() const = 0;
-  virtual IteratorPair _equals(const AllTypeVariant& value) const = 0;
-  virtual std::pair<IteratorPair, IteratorPair> _not_equals(const AllTypeVariant& value) const = 0;
+  virtual IteratorPair _range_equals(const AllTypeVariant& value) const = 0;
+  virtual std::pair<IteratorPair, IteratorPair> _range_not_equals(const AllTypeVariant& value) const = 0;
   virtual bool _is_index_for(const ColumnID column_id) const = 0;
   virtual std::set<ChunkID> _get_indexed_chunk_ids() const = 0;
   virtual size_t _memory_consumption() const = 0;
