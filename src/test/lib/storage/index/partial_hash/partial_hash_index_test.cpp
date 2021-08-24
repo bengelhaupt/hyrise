@@ -158,14 +158,14 @@ TEST_F(PartialHashIndexTest, Add) {
 
   auto chunks_to_add =
       std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>{std::make_pair(ChunkID{2}, table->get_chunk(ChunkID{2}))};
-  EXPECT_EQ(index->add(chunks_to_add), 1);
+  EXPECT_EQ(index->insert_entries(chunks_to_add), 1);
 
   EXPECT_EQ(index->get_indexed_chunk_ids(), (std::set<ChunkID>{ChunkID{0}, ChunkID{1}, ChunkID{2}}));
   EXPECT_EQ(std::distance(index->cbegin(), index->cend()), 21);
   EXPECT_EQ(std::distance(index->null_cbegin(), index->null_cend()), 3);
   EXPECT_EQ(*index->range_equals("new1").first, (RowID{ChunkID{2}, ChunkOffset{0}}));
 
-  EXPECT_EQ(index->add(chunks_to_add), 0);
+  EXPECT_EQ(index->insert_entries(chunks_to_add), 0);
 }
 
 TEST_F(PartialHashIndexTest, InsertIntoEmpty) {
@@ -195,7 +195,7 @@ TEST_F(PartialHashIndexTest, Remove) {
 TEST_F(PartialHashIndexTest, RemoveFromEmpty) {
   auto empty_index = PartialHashIndex(std::vector<std::pair<ChunkID, std::shared_ptr<Chunk>>>(), ColumnID{0});
 
-  EXPECT_EQ(empty_index.remove(std::vector<ChunkID>{ChunkID{0}}), 0);
+  EXPECT_EQ(empty_index.remove_entries(std::vector<ChunkID>{ChunkID{0}}), 0);
   EXPECT_EQ(empty_index.get_indexed_chunk_ids().size(), 0);
   EXPECT_EQ(empty_index.cbegin(), empty_index.cend());
 }

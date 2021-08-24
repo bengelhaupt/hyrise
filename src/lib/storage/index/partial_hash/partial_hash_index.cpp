@@ -38,7 +38,7 @@ size_t PartialHashIndex::insert_entries(
   }
 }
 
-size_t PartialHashIndex::remove(const std::vector<ChunkID>& chunks_to_remove) {
+size_t PartialHashIndex::remove_entries(const std::vector<ChunkID>& chunks_to_remove) {
   if (!_is_initialized) {
     return 0;
   }

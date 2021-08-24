@@ -42,7 +42,7 @@ class PartialHashIndex : public AbstractTableIndex {
    *
    * @return The number of removed chunks.
    */
-  size_t remove(const std::vector<ChunkID>&);
+  size_t remove_entries(const std::vector<ChunkID>&);
 
  protected:
   Iterator _cbegin() const override;
